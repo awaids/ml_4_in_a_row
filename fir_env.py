@@ -28,6 +28,7 @@ class FourInRowEnv(Env):
         return self.shape[0]
 
     def reset(self,) -> None:
+        self.done = False
         self.state = np.zeros(shape=self.shape, dtype=np.int8)
 
 
@@ -73,28 +74,28 @@ class FourInRowEnv(Env):
 
         return four_in_rows | four_in_cols | four_in_diag
 
-    def has_game_ended(self) -> bool:
+    def is_board_full(self) -> bool:
         """ Returns true if the game has ended and no more places are left to add pieces """
         return self.state.all()
 
     def step(self, action: ActType) -> Tuple[ObsType, int, bool, bool, dict]:
         """ Returns (observations, reward, done) """
+        assert(not self.done), "Game already finished"
         assert(self.action_space.contains(action)), "Action not part of action_space"
-        reward, done = 0.0, False
+        reward, info = 0, None
 
         # If action is impossible return negative reward!
         if not self.add_piece(action):
             # We end the game if we get a wrong move from the agent!
-            return self.state, LostValue, True
-        
-        # Check if addition won the game
-        if self.has_won():
+            reward = LostValue
+            self.done = True
+        elif self.has_won():
+            # Check if addition won the game
             reward = WonValue
-            done = True
+            self.done = True
         else:
-            done = self.has_game_ended()
-
-        return self.state, reward, done
+            self.done = self.is_board_full()
+        return self.state, reward, self.done, info
 
 
 
