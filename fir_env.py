@@ -6,6 +6,7 @@ from typing import Tuple, TypeVar, Literal, List
 ObsType = TypeVar("ObsType")
 ActType = TypeVar("ActType")
 PieceType = Literal[1, -1]
+PlayerType = Literal[1, 2]
 FOUR = 4
 LostValue = -1
 WonValue = 1
@@ -64,7 +65,7 @@ class Board:
                     return True
             return False
         return found_pattern(self.b_array) | found_pattern(self.b_array.T) | check_diagonal_arr(self.b_array) | check_diagonal_arr(np.fliplr(self.b_array))
-        
+
 
 class FourInRowEnv(Env):
     metadata = {"render_modes": None}
@@ -91,7 +92,13 @@ class FourInRowEnv(Env):
     
     def reset(self) -> None:
         self.done = False
-        self.board.reset() 
+        self.board.reset()
+
+    def col_to_action(self, col:int, player:PlayerType) -> ActType:
+        """ Helper function to convert player column to action """
+        assert (col < self.cols), "wrong move(col) recieved"
+        assert (player in [1,2]), "wrong player"
+        return col + self.cols if player == 2 else 0
 
     def add_piece(self, action: ActType) -> bool:
         """Adds a piece to col, value added depends on the col value

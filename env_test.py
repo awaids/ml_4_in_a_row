@@ -312,3 +312,11 @@ def test_step():
     _, reward, done, _ = env.step(action=3)
     assert(reward == LostValue), "Worng reward recieved"
     assert(done == True), "Game must be done"
+
+def test_col_to_action():
+    """ Check helper function to get the proper action type for player """
+    env = FourInRowEnv(rows=6, cols=7)
+    assert(env.col_to_action(col=0, player=1) == 0)
+    assert(env.col_to_action(col=0, player=2) == 7)
+    with pytest.raises(AssertionError):
+        env.col_to_action(col=7, player=1)
